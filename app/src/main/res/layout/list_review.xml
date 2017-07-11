@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:weightSum="1">
+
+    <TextView
+        android:id="@+id/author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:textStyle="bold"
+        tools:text="Movie Queen41" />
+
+    <TextView
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fadingEdge="vertical"
+        android:maxLines="3"
+        android:paddingEnd="16dp"
+        android:paddingStart="32dp"
+        tools:text="The First Great DCEU Film** This film is the origin story of Diana Prince/Wonder Woman (Gal Gadot), who was first introduced in Batman v. Superman last year. She is born and trained on Themyscira, the hidden island where the powerful warrior women known as the Amazons live. One day, Steve Trevor (Chris Pine), an American World War I spy, crashes off the coast of Themyscira and is rescued by Diana and the two team up to take down Ares, the God of War, and the Germans, who are developing a very deadly form of mustard gas. There are fantastic action sequences in this film, especially by Gal Gadot. It's amazing to see her single-handedly storm the German front, inspiring the Allies to fight with her. Gadot takes over from the legendary Linda Carter and makes the role her own. She has great chemistry with Pine. They are complete equals in this film. It's refreshing to see the female lead in a superhero film not be the love interest. The only negative part of the film are the lackluster villains. Hopefully, Wonder Woman will have more formidable foes in future films." />
+</LinearLayout>
