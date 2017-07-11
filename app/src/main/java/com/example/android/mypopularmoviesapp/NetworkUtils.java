@@ -18,7 +18,7 @@ public class NetworkUtils {
 
     private static final String BASE_URL = "http://api.themoviedb.org";
     final static String API_PARAM = "api_key";
-    final static String API_KEY = "9c11e1693a8fbaa62bb4172d6f2132c8";
+    final static String API_KEY = "";
 
 
     public static String getResponseFromHttpUrl(URL url) throws IOException {
