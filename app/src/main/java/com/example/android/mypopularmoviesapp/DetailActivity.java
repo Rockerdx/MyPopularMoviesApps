@@ -1,26 +1,23 @@
 package com.example.android.mypopularmoviesapp;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,17 +48,20 @@ public class DetailActivity extends AppCompatActivity implements RecyclerItemCli
     @BindView(R.id.rvTrailer) RecyclerView rvTrailer;
     @BindView(R.id.rvReview) RecyclerView rvReview;
     @BindView(R.id.btn_favorite) Button btnFavorite;
-
+    @BindView(R.id.mScroll) ScrollView mScroll;
 
 
     byte[] image;
     static String URL_YOUTUBE = "https://www.youtube.com/watch?v=";
     List<String> listTrailerLinks;
     ArrayList<ReviewModel> listReviews;
+    Integer pos;
+    private static final String LIFECYCLE_KEY = "savedState";
 
     ImageModel movieDetail;
     ArrayList<ImageModel> arrayDetails;
     Integer id;
+    Boolean Favorite;
 
     private SQLiteDatabase mDb;
 
@@ -75,8 +74,16 @@ public class DetailActivity extends AppCompatActivity implements RecyclerItemCli
 
         Intent getIntent = getIntent();
         id = getIntent.getIntExtra("position",0);
+        Favorite = getIntent.getBooleanExtra("favorite",false);
         arrayDetails = (ArrayList<ImageModel>) getIntent.getSerializableExtra("list");
         movieDetail = arrayDetails.get(id);
+
+        if(savedInstanceState != null){
+            if(savedInstanceState.containsKey(LIFECYCLE_KEY)){
+                pos = savedInstanceState.getInt(LIFECYCLE_KEY,0);
+                Log.d("tes","restored pos " + savedInstanceState.getInt(LIFECYCLE_KEY,0));
+            }
+        }
 
         ButterKnife.bind(this);
 
@@ -90,13 +97,18 @@ public class DetailActivity extends AppCompatActivity implements RecyclerItemCli
             Picasso.with(this).load("http://image.tmdb.org/t/p/w185/" + movieDetail.getImagePath()).into(imagePoster);
             Picasso.with(this).load("http://image.tmdb.org/t/p/w185/" + movieDetail.getImagePath()).into(target);
         }else {
-            imagePoster.setImageBitmap(movieDetail.getOfflineImage());
+            imagePoster.setImageBitmap(getImage(movieDetail.getOfflineImage()));
         }
         new getTrailer().execute(movieDetail.getId(),"videos");
         new getTrailer().execute(movieDetail.getId(),"reviews");
 
         MoviesDbHelper dbHelper = new MoviesDbHelper(this);
         mDb = dbHelper.getWritableDatabase();
+
+        if(Favorite){
+            btnFavorite.setCompoundDrawablesRelative(ContextCompat.getDrawable(getApplicationContext(),R.drawable.ic_star_black_24dp),null,null,null);
+            btnFavorite.setText(R.string.favorited);
+        }
 
         btnFavorite.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -148,6 +160,9 @@ public class DetailActivity extends AppCompatActivity implements RecyclerItemCli
             else if(result.equals("reviews")){
                 rvReview.setLayoutManager(new LinearLayoutManager(rvTrailer.getContext()));
                 rvReview.setAdapter(new ReviewAdapter(getApplicationContext(),listReviews));
+                if(pos!=null){
+                    mScroll.scrollTo(pos,mScroll.getScrollY());
+                }
             }
             else{
                 Toast.makeText(DetailActivity.this,"error",Toast.LENGTH_SHORT).show();
@@ -238,5 +253,21 @@ public class DetailActivity extends AppCompatActivity implements RecyclerItemCli
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 0, outputStream);
         return outputStream.toByteArray();
+    }
+
+    public static Bitmap getImage(byte[] image) {
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(LIFECYCLE_KEY,mScroll.getScrollX());
+        Log.d("tes","current pos " + mScroll.getScrollX());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        pos = savedInstanceState.getInt(LIFECYCLE_KEY,0);
     }
 }

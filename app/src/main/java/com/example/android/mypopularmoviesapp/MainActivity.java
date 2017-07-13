@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     ImageModel movieDetail;
     ArrayList<ImageModel> arrayResults;
     List<String> listFavorite;
+    Integer pos;
+    private static final String LIFECYCLE_KEY = "savedState";
 
     private SQLiteDatabase mDb;
 
@@ -42,6 +44,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mGridview = (GridView) findViewById(R.id.mGrid);
+        new getData().execute("popular");
+        if(savedInstanceState != null){
+            if(savedInstanceState.containsKey(LIFECYCLE_KEY)){
+                pos = savedInstanceState.getInt(LIFECYCLE_KEY,0);
+                Log.d("tes","restored pos " + savedInstanceState.getInt(LIFECYCLE_KEY,0));
+            }
+        }
 
         MoviesDbHelper dbHelper = new MoviesDbHelper(this);
         mDb = dbHelper.getReadableDatabase();
@@ -52,12 +61,7 @@ public class MainActivity extends AppCompatActivity {
             listFavorite.add(mCursor.getString(mCursor.getColumnIndex(MoviesContract.MoviesDB.COLUMN_MOVIE_ID)));
             Log.d("tes", mCursor.getString(mCursor.getColumnIndex(MoviesContract.MoviesDB.COLUMN_MOVIE_ID)));
         }
-//        for(int g =0;g<mCursor.getCount();g++){
-//            mCursor.moveToNext();
-//
-//        }
 
-        new getData().execute("popular");
         mGridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -67,10 +71,8 @@ public class MainActivity extends AppCompatActivity {
 
                 if (listFavorite.contains(arrayResults.get(position).getId())) {
                     x.putExtra("favorite", true);
-                    Toast.makeText(getApplicationContext(), "fav", Toast.LENGTH_SHORT).show();
                 } else {
                     x.putExtra("favorite", false);
-                    Toast.makeText(getApplicationContext(), "not fav", Toast.LENGTH_SHORT).show();
                 }
                 x.putParcelableArrayListExtra("list", arrayResults);
                 startActivity(x);
@@ -110,10 +112,17 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(ArrayList<ImageModel> result) {
 
 
+
+
             ImageAdapter adapter = new ImageAdapter(MainActivity.this, R.layout.image_thumb, result);
 
             mGridview.setAdapter(adapter);
             adapter.updateResults(result);
+
+            if(pos!=null){
+                mGridview.smoothScrollToPosition(pos);
+            }
+
             super.onPostExecute(result);
         }
 
@@ -170,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             movieDetail.setTitle(mCursor.getString(mCursor.getColumnIndex(MoviesContract.MoviesDB.COLUMN_MOVIE_NAME)));
             movieDetail.setId(mCursor.getString(mCursor.getColumnIndex(MoviesContract.MoviesDB.COLUMN_MOVIE_ID)));
             byte[] image = mCursor.getBlob(mCursor.getColumnIndex(MoviesContract.MoviesDB.COLUMN_MOVIE_IMAGE));
-            movieDetail.setOfflineImage(getImage(image));
+            movieDetail.setOfflineImage(image);
             arrayResults.add(movieDetail);
 
             ImageAdapter adapter = new ImageAdapter(MainActivity.this, R.layout.image_thumb, arrayResults);
@@ -196,7 +205,17 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    public static Bitmap getImage(byte[] image) {
-        return BitmapFactory.decodeByteArray(image, 0, image.length);
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(LIFECYCLE_KEY,mGridview.getFirstVisiblePosition());
+        Log.d("tes","current pos " + mGridview.getFirstVisiblePosition());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        pos = savedInstanceState.getInt(LIFECYCLE_KEY,0);
     }
 }
