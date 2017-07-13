@@ -14,13 +14,13 @@ public class ImageModel implements Parcelable {
     String overview;
     String releaseDate;
     String runtime;
-    Bitmap offlineImage;
+    byte[] offlineImage;
 
-    public Bitmap getOfflineImage() {
+    public byte[] getOfflineImage() {
         return offlineImage;
     }
 
-    public void setOfflineImage(Bitmap offlineImage) {
+    public void setOfflineImage(byte[] offlineImage) {
         this.offlineImage = offlineImage;
     }
 
@@ -110,7 +110,7 @@ public class ImageModel implements Parcelable {
         dest.writeString(this.overview);
         dest.writeString(this.releaseDate);
         dest.writeString(this.runtime);
-        dest.writeParcelable(this.offlineImage, flags);
+        dest.writeByteArray(this.offlineImage);
         dest.writeString(this.id);
         dest.writeString(this.language);
         dest.writeString(this.rating);
@@ -122,7 +122,7 @@ public class ImageModel implements Parcelable {
         this.overview = in.readString();
         this.releaseDate = in.readString();
         this.runtime = in.readString();
-        this.offlineImage = in.readParcelable(Bitmap.class.getClassLoader());
+        this.offlineImage = in.createByteArray();
         this.id = in.readString();
         this.language = in.readString();
         this.rating = in.readString();

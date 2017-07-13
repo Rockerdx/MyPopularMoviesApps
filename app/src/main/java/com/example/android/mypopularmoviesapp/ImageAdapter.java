@@ -2,6 +2,7 @@ package com.example.android.mypopularmoviesapp;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -68,7 +69,7 @@ public class ImageAdapter extends ArrayAdapter<ImageModel> {
         if(!(listImageUrl.get(position).getImagePath() == null)) {
             Picasso.with(getContext()).load("http://image.tmdb.org/t/p/w185/" + listImageUrl.get(position).getImagePath()).into(holder.imageView);
         }else{
-            holder.imageView.setImageBitmap(listImageUrl.get(position).getOfflineImage());
+            holder.imageView.setImageBitmap(getImage(listImageUrl.get(position).getOfflineImage()));
         }
 
         return convertView;
@@ -76,5 +77,9 @@ public class ImageAdapter extends ArrayAdapter<ImageModel> {
     }
     private static class ViewHolder {
         ImageView imageView;
+    }
+
+    public static Bitmap getImage(byte[] image) {
+        return BitmapFactory.decodeByteArray(image, 0, image.length);
     }
 }
